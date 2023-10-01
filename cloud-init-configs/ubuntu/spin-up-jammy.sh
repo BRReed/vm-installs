@@ -44,4 +44,4 @@ EOF
 cloud-localds my-seed.img user-data meta-data
 
 qemu-img create -F qcow2 -b jammy-server-cloudimg-amd64.img -f qcow2 ./ub-jammy-vm.qcow2 50G
-virt-install --name testvm3 --memory 4096 --vcpus 4 --os-variant ubuntujammy --disk ./ub-jammy-vm.qcow2 --disk ./my-seed.img --import
+virt-install --name jammy-cloud --memory 4096 --vcpus 4 --os-variant ubuntujammy --disk ./ub-jammy-vm.qcow2 --disk ./my-seed.img --import
