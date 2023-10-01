@@ -1,6 +1,12 @@
 #!/bash/sh
 
-virsh destroy testvm3 && virsh undefine testvm3 --remove-all-storage
+
+if !(virsh list --all | grep " jammy-cloud ") then
+  echo "jammy-cloud vm does not exist"
+else
+  echo "destroy, undefine and removing all storage for jammy-cloud vm"
+  virsh destroy jammy-cloud && virsh undefine jammy-cloud --remove-all-storage
+fi
 
 if !(find jammy-server-cloudimg-amd64.img) then
   echo "jammy-server-cloudimg-amd64.img does not exist"
@@ -22,4 +28,3 @@ else
   echo "removing meta-data"
   rm meta-data
 fi
-
