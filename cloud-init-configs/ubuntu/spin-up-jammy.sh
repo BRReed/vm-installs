@@ -22,6 +22,13 @@ else
   touch my-seed.img
 fi
 
+if (find jammy-server-cloudimg-amd64.img) then
+  echo "jammy-server-cloudimg-amd64.img exists"
+else
+  echo "Downloading latest jammy-server-cloudimg-amd64.img"
+  wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
+fi
+
 cat << EOF > user-data
 #cloud-config
 
@@ -34,3 +41,7 @@ users:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINbliisKG/Rajx1joDff9Q6Kh9tLL+KD9Zqe4ZOsVttU b.r.reed@gmail.com
 EOF
 
+cloud-localds my-seed.img user-data meta-data
+
+qemu-img create -F qcow2 -b jammy-server-cloudimg-amd64.img -f qcow2 ./ub-jammy-vm.qcow2 50G
+virt-install --name testvm3 --memory 4096 --vcpus 4 --os-variant ubuntujammy --disk ./ub-jammy-vm.qcow2 --disk ./my-seed.img --import
