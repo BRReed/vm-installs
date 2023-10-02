@@ -5,17 +5,17 @@ if (find user-data) then
   echo "user-data exists"
 else
   echo "Creating user-data"
-  touch user-data
-  cat << EOF > user-data
+  sshkey="$(cat ~/.ssh/id_ed25519.pub)"
+  tee "./user-data" > /dev/null << EOF
 #cloud-config
 
 users:
   - default
   - name: brian
-     sudo: ["ALL-(ALL) NOPASSWD:ALL"]
+    sudo: ["ALL-(ALL) NOPASSWD:ALL"]
     shell: /bin/sh
     ssh-authorized-keys:
-      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINbliisKG/Rajx1joDff9Q6Kh9tLL+KD9Zqe4ZOsVttU b.r.reed@gmail.com
+      - $sshkey
 EOF
 fi
 
@@ -54,7 +54,7 @@ else
   qemu-img create -F qcow2 -b jammy-server-cloudimg-amd64.img -f qcow2 ./ub-jammy-vm.qcow2 50G
 fi
 
-if (virsh domifaddr jammy-cloud) then
+if (virsh list | grep running | grep jammy-cloud) then
   echo "jammy-cloud vm already exists"
 else
   echo "Installing jammy-cloud vm"
