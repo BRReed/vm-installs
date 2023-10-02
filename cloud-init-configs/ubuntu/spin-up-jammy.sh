@@ -6,6 +6,17 @@ if (find user-data) then
 else
   echo "Creating user-data"
   touch user-data
+  cat << EOF > user-data
+#cloud-config
+
+users:
+  - default
+  - name: brian
+     sudo: ["ALL-(ALL) NOPASSWD:ALL"]
+    shell: /bin/sh
+    ssh-authorized-keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINbliisKG/Rajx1joDff9Q6Kh9tLL+KD9Zqe4ZOsVttU b.r.reed@gmail.com
+EOF
 fi
 
 if (find meta-data) then
@@ -29,19 +40,23 @@ else
   wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
 fi
 
-cat << EOF > user-data
-#cloud-config
+if [ -s my-seed.img ]; then
+  echo "my-seed.img has been supplied with data"
+else
+  echo "Supplying my-seed.img with data"
+  cloud-localds my-seed.img user-data meta-data
+fi
 
-users:
-  - default
-  - name: brian
-    sudo: ["ALL-(ALL) NOPASSWD:ALL"]
-    shell: /bin/sh
-    ssh-authorized-keys:
-      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINbliisKG/Rajx1joDff9Q6Kh9tLL+KD9Zqe4ZOsVttU b.r.reed@gmail.com
-EOF
+if [ -f ./ub-jammy-vm.qcow2 ]; then
+  echo "ub-jammy-vm.qcow2 already exists"
+else
+  echo "creating ub-jammy-vm.qcow2"
+  qemu-img create -F qcow2 -b jammy-server-cloudimg-amd64.img -f qcow2 ./ub-jammy-vm.qcow2 50G
+fi
 
-cloud-localds my-seed.img user-data meta-data
-
-qemu-img create -F qcow2 -b jammy-server-cloudimg-amd64.img -f qcow2 ./ub-jammy-vm.qcow2 50G
-virt-install --name jammy-cloud --memory 4096 --vcpus 4 --os-variant ubuntujammy --disk ./ub-jammy-vm.qcow2 --disk ./my-seed.img --import
+if (virsh domifaddr jammy-cloud) then
+  echo "jammy-cloud vm already exists"
+else
+  echo "Installing jammy-cloud vm"
+  virt-install --name jammy-cloud --memory 4096 --vcpus 4 --os-variant ubuntujammy --disk ./ub-jammy-vm.qcow2 --disk ./my-seed.img --import
+fi
