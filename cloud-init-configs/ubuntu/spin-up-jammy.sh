@@ -5,7 +5,6 @@ if (find user-data) then
   echo "user-data exists"
 else
   echo "Creating user-data"
-  sshkey="$(cat ~/.ssh/id_ed25519.pub)"
   tee "./user-data" > /dev/null << EOF
 #cloud-config
 
@@ -15,7 +14,7 @@ users:
     sudo: ["ALL-(ALL) NOPASSWD:ALL"]
     shell: /bin/sh
     ssh-authorized-keys:
-      - $sshkey
+      - $(cat ~/.ssh/id_ed25519.pub)
 EOF
 fi
 
