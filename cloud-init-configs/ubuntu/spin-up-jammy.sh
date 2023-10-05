@@ -11,7 +11,7 @@ else
 users:
   - default
   - name: brian
-    sudo: ["ALL-(ALL) NOPASSWD:ALL"]
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
     shell: /bin/sh
     ssh-authorized-keys:
       - $(cat ~/.ssh/id_ed25519.pub)
